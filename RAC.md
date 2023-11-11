@@ -9,7 +9,14 @@ Provision a Linux server (Oracle Linux 7.9) with 2 CPUs and 16GB of RAM, 256GB o
 mkdir ~/dev
 cd ~/dev
 
-sudo yum update -y 
+sudo yum update -y ; sudo yum update -y 
+sudo yum install -y docker-engine
+sudo service docker start
+sudo docker run hello-world
+
+```
+
+```
 sudo yum install -y nfs-utils git wget curl jq
 
 git clone https://github.com/oracle/docker-images.git
