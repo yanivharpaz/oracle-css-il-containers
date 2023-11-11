@@ -59,14 +59,16 @@ sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
 sed -i 's/SELINUX=permissive/SELINUX=disabled/' /etc/selinux/config
 cat /etc/selinux/config
 
-# reboot
+sestatus
+
+# reboot if sestatus is not disabled
 
 ```
 
 
 ### DNS Server
 ```
-cd docker-images/OracleDatabase/RAC/OracleDNSServer/dockerfiles/
+cd ~/dev/docker-images/OracleDatabase/RAC/OracleDNSServer/dockerfiles/
 ./buildContainerImage.sh latest
 
 docker images
