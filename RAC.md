@@ -30,7 +30,25 @@ https://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.h
 sudo yum update -y 
 sudo yum -y install nfs-utils
 
+udo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+sudo yum install -y epel-release apt-transport-https conntrack 
+sudo yum install -y git mc ncdu zsh htop vim gcc wget jq
+
+sudo yum -y groupinstall "Development Tools"
+sudo yum install -y openssl-devel bzip2-devel libffi-devel xz-devel
+
+sudo yum install -y bind-utils mlocated yum-utils createrepo bin-utils openssh-clients perl parted
+
+sudo yum install -y docker
+
+sudo groupadd docker
+sudo usermod -aG docker $USER
+
 sudo su
+
+sudo service docker start
+sudo systemctl enable docker
+
 sestatus
 
 cat /etc/selinux/config
@@ -38,14 +56,14 @@ sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
 sed -i 's/SELINUX=permissive/SELINUX=disabled/' /etc/selinux/config
 cat /etc/selinux/config
 
-reboot
+# reboot
 
 ```
 
 
 ### DNS Server
 ```
-cd docker-images/OracleDatabase/RAC/OracleDNSServer
+cd docker-images/OracleDatabase/RAC/OracleDNSServer/dockerfiles/
 ./buildContainerImage.sh latest
 
 docker images
@@ -86,6 +104,9 @@ docker run -d -t --hostname racnode-storage \
 --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \
 --name racnode-storage oracle/rac-storage-server:19.3.0
 
+docker logs -f racnode-storage
+
+
 docker volume create --driver local \
 --opt type=nfs \
 --opt   o=addr=192.168.17.25,rw,bg,hard,tcp,vers=3,timeo=600,rsize=32768,wsize=32768,actimeo=0 \
@@ -118,7 +139,12 @@ sudo sysctl -a
 sudo sysctl -p
 ``` 
 
-### make sure you copied the Oracle RDBMS binaries to the linux server
+### make sure you copied the Oracle RDBMS binaries to the linux server  
+download from here:  
+https://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.html
+
+
+
 ```
 [opc@rac-test-1]$ pwd
 /home/opc/dev/docker-images/OracleDatabase/RAC/OracleRealApplicationClusters/dockerfiles/21.3.0
@@ -128,6 +154,14 @@ sudo sysctl -p
 -rw-r--r-- 1 opc opc 2.3G Nov  9 14:39 LINUX.X64_213000_grid_home.zip
 
 ```
+
+```
+cd ~/dev/docker-images/OracleDatabase/RAC/OracleRealApplicationClusters/dockerfiles/21.3.0
+wget https://stgvscodepub.blob.core.windows.net/yhpub/LINUX.X64_213000_db_home.zip
+wget https://stgvscodepub.blob.core.windows.net/yhpub/LINUX.X64_213000_grid_home.zip
+
+```
+
 
 ### Build the Oracle RDBMS binaries image
 ```
