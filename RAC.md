@@ -33,11 +33,13 @@ https://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.h
 sudo yum update -y 
 sudo yum -y install nfs-utils
 
-udo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 sudo yum install -y epel-release apt-transport-https conntrack 
 sudo yum install -y git mc ncdu zsh htop vim gcc wget jq
-sudo yum install -y docker-engine docker-cli 
 
+sudo su
+yum install -y docker-engine docker-cli 
+exit
 
 sudo yum -y groupinstall "Development Tools"
 sudo yum install -y openssl-devel bzip2-devel libffi-devel xz-devel
