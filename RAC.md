@@ -51,18 +51,8 @@ sudo yum install -y openssl-devel bzip2-devel libffi-devel xz-devel
 
 sudo yum install -y bind-utils mlocated yum-utils createrepo bin-utils openssh-clients perl parted
 
-sudo su
-yum install -y docker-engine docker-cli 
-exit
-
-
 sudo groupadd docker
 sudo usermod -aG docker $USER
-
-sudo su
-
-sudo service docker start
-sudo systemctl enable docker
 
 sestatus
 
