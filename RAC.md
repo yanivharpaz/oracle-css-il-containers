@@ -10,7 +10,7 @@ mkdir ~/dev
 cd ~/dev
 
 sudo yum update -y 
-sudo yum install -y nfs-utils git
+sudo yum install -y nfs-utils git wget curl jq
 
 git clone https://github.com/oracle/docker-images.git
 
