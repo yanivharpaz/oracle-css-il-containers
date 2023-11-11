@@ -36,13 +36,14 @@ sudo yum -y install nfs-utils
 udo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 sudo yum install -y epel-release apt-transport-https conntrack 
 sudo yum install -y git mc ncdu zsh htop vim gcc wget jq
+sudo yum install -y docker-engine docker-cli 
+
 
 sudo yum -y groupinstall "Development Tools"
 sudo yum install -y openssl-devel bzip2-devel libffi-devel xz-devel
 
 sudo yum install -y bind-utils mlocated yum-utils createrepo bin-utils openssh-clients perl parted
 
-sudo yum install -y docker
 
 sudo groupadd docker
 sudo usermod -aG docker $USER
@@ -65,9 +66,24 @@ sestatus
 
 ```
 
+### allow docker to run from the current user
+```
+# from the user
+
+sudo groupadd docker
+sudo usermod -aG docker $USER
+sudo service docker restart
+
+# logout and login again
+
+```
+
 
 ### DNS Server
 ```
+
+sudo service docker restart
+
 cd ~/dev/docker-images/OracleDatabase/RAC/OracleDNSServer/dockerfiles/
 ./buildContainerImage.sh latest
 
