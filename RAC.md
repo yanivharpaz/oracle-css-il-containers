@@ -182,6 +182,8 @@ cd ..
 ```
 # deal with the error: [FATAL] [INS-40937] The following hostnames are invalid:buildkitsandbox
 
+cd ~/dev/docker-images/OracleDatabase/RAC/OracleRealApplicationClusters/dockerfiles
+
 export DOCKER_BUILDKIT=0
 
 ./buildContainerImage.sh -v 21.3.0 -o '--build-arg  BASE_OL_IMAGE=oraclelinux:7 --build-arg SLIMMING=true|false'
