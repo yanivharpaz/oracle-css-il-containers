@@ -1,18 +1,29 @@
 
-# based on the Oracle RAC container documentation
+# CSS-IL RAC Workshop
+
+### Based on the Oracle RAC container documentation
 
 * https://github.com/oracle/docker-images/tree/main/OracleDatabase/RAC/OracleDNSServer
 
 Provision a Linux server (Oracle Linux 7.9) with 2 CPUs and 16GB of RAM, 256GB of disk space
 
+
+### install docker
 ```
 
 sudo yum update -y ; sudo yum update -y 
 sudo yum install -y docker-engine
 sudo service docker start
+sudo systemctl enable docker
+
 sudo docker run hello-world
 
+sudo groupadd docker
+sudo usermod -aG docker $USER
+
 ```
+
+### clone the Oracle docker-images repository
 
 ```
 sudo yum install -y nfs-utils git wget curl jq
@@ -51,31 +62,14 @@ sudo yum install -y openssl-devel bzip2-devel libffi-devel xz-devel
 
 sudo yum install -y bind-utils mlocated yum-utils createrepo bin-utils openssh-clients perl parted
 
-sudo groupadd docker
-sudo usermod -aG docker $USER
-
-sestatus
-
 cat /etc/selinux/config
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
-sed -i 's/SELINUX=permissive/SELINUX=disabled/' /etc/selinux/config
+sudo sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
+sudo sed -i 's/SELINUX=permissive/SELINUX=disabled/' /etc/selinux/config
 cat /etc/selinux/config
 
 sestatus
 
 # reboot if sestatus is not disabled
-
-```
-
-### allow docker to run from the current user
-```
-# from the user
-
-sudo groupadd docker
-sudo usermod -aG docker $USER
-sudo service docker restart
-
-# logout and login again
 
 ```
 
@@ -135,8 +129,6 @@ docker volume create --driver local \
 --opt device=192.168.17.25:/oradata \
 racstorage
 
-
-
 ```
 
 ### update sysctl configuration
@@ -158,10 +150,11 @@ net.core.rmem_default = 262144
 ### list and reload parameters
 ```
 sudo sysctl -a
-sudo sysctl -p
+sudo sysctl -p  
+
 ``` 
 
-### make sure you copied the Oracle RDBMS binaries to the linux server  
+### Make sure you copied the Oracle RDBMS binaries to the linux server  
 download from here:  
 https://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.html
 
@@ -176,6 +169,8 @@ https://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.h
 -rw-r--r-- 1 opc opc 2.3G Nov  9 14:39 LINUX.X64_213000_grid_home.zip
 
 ```
+
+### Download the software from the storage container
 
 ```
 cd ~/dev/docker-images/OracleDatabase/RAC/OracleRealApplicationClusters/dockerfiles/21.3.0
@@ -192,8 +187,8 @@ wget https://stgvscodepub.blob.core.windows.net/yhpub/LINUX.X64_213000_grid_home
 export DOCKER_BUILDKIT=0
 
 ./buildContainerImage.sh -v 21.3.0 -o '--build-arg  BASE_OL_IMAGE=oraclelinux:7 --build-arg SLIMMING=true|false'
-```  
 
+```  
 
 
 ## network
@@ -211,7 +206,7 @@ openssl rand -out /opt/.secrets/pwd.key -hex 64
 
 ```
 
-
+### set a common password
 ```
 vim /opt/.secrets/common_os_pwdfile
 
@@ -222,13 +217,14 @@ export COMMON_OS_PWD_FILE="Yaniv123@"
 
 ```
 
-
+### create a RAC hosts file
 ```
 mkdir /opt/containers/
 touch /opt/containers/rac_host_file
 
 ```
 
+### create the first node container
 
 ```
 docker create -t -i \
@@ -269,6 +265,7 @@ docker create -t -i \
 
 ```
 
+### prepare the network for the first node
 
 ```
 docker network disconnect bridge racnode1
@@ -277,7 +274,15 @@ docker network connect rac_priv1_nw --ip 192.168.17.150  racnode1
 
 ```
 
+### start the first node
 ```
 docker start racnode1
 
 ```
+
+
+
+Thank you for reading.  
+  
+
+You can find me on https://linktr.ee/yanivharpaz
