@@ -133,11 +133,10 @@ racstorage
 
 ### update sysctl configuration
 ```
-sudo vim /etc/sysctl.conf
+# sudo vim /etc/sysctl.conf
 
-```
-### add the following lines
-```
+sudo su
+cat >> /etc/sysctl.conf << EOF
 fs.aio-max-nr = 1048576
 fs.file-max = 6815744
 net.core.rmem_max = 4194304
@@ -145,19 +144,17 @@ net.core.rmem_default = 262144
 net.core.wmem_max = 1048576
 net.core.wmem_default = 262144
 net.core.rmem_default = 262144
-```
+EOF
 
-### list and reload parameters
-```
 sudo sysctl -a
 sudo sysctl -p  
 
+exit
 ``` 
 
 ### Make sure you copied the Oracle RDBMS binaries to the linux server  
 download from here:  
 https://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.html
-
 
 
 ```
@@ -176,6 +173,7 @@ https://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.h
 cd ~/dev/docker-images/OracleDatabase/RAC/OracleRealApplicationClusters/dockerfiles/21.3.0
 wget https://stgvscodepub.blob.core.windows.net/yhpub/LINUX.X64_213000_db_home.zip
 wget https://stgvscodepub.blob.core.windows.net/yhpub/LINUX.X64_213000_grid_home.zip
+cd ..
 
 ```
 
@@ -208,12 +206,14 @@ openssl rand -out /opt/.secrets/pwd.key -hex 64
 
 ### set a common password
 ```
-vim /opt/.secrets/common_os_pwdfile
+cat > /opt/.secrets/common_os_pwdfile << EOF
+P@ssw0rd123#@
+EOF
 
 openssl enc -aes-256-cbc -salt -in /opt/.secrets/common_os_pwdfile -out /opt/.secrets/common_os_pwdfile.enc -pass file:/opt/.secrets/pwd.key
 rm -f /opt/.secrets/common_os_pwdfile
 
-export COMMON_OS_PWD_FILE="Yaniv123@"
+export COMMON_OS_PWD_FILE="P@ssw0rd123#@"
 
 ```
 
