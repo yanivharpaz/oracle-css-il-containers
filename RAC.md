@@ -157,6 +157,7 @@ sudo sysctl -a
 sudo sysctl -p  
 
 exit
+
 ``` 
 
 ### Make sure you copied the Oracle RDBMS binaries to the linux server  
