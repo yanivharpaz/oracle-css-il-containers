@@ -124,6 +124,9 @@ docker run -d -t --hostname racnode-storage \
 
 docker logs -f racnode-storage
 
+```
+
+```
 
 docker volume create --driver local \
 --opt type=nfs \
