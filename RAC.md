@@ -303,6 +303,7 @@ docker start racnode1
 ```
 docker start racnode1
 docker exec -it racnode1 bash
+
 cat >>  /tmp/resetFailedunits.sh << EOL
  #!/bin/bash
           failed_unit_file_name=reset_failed_units.txt
@@ -319,12 +320,16 @@ EOL
 
 chmod a+x /tmp/resetFailedunits.sh
 /tmp/resetFailedunits.sh
-
 echo "* * * * * sleep 00; /tmp/resetFailedunits.sh" >> mycron
 echo "* * * * * sleep 15; /tmp/resetFailedunits.sh" >> mycron
 echo "* * * * * sleep 30; /tmp/resetFailedunits.sh" >> mycron
 echo "* * * * * sleep 45; /tmp/resetFailedunits.sh" >> mycron
 crontab mycron
+crontab -l
+sleep 5
+systemctl stop rhnsd
+systemctl start rhnsd
+systemctl status
 
 tail -f /tmp/orod.log
 
