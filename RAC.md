@@ -295,10 +295,6 @@ docker network connect rac_priv1_nw --ip 192.168.17.150  racnode1
 ```
 
 ### start the first node
-```
-docker start racnode1
-
-```
 
 ```
 docker start racnode1
