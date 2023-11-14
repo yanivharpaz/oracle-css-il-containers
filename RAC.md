@@ -126,6 +126,8 @@ docker logs -f racnode-storage
 
 ```
 
+### Create a docker volume  
+
 ```
 
 docker volume create --driver local \
@@ -303,7 +305,10 @@ cat >>  /tmp/resetFailedunits.sh << EOL
             touch /tmp/$passed_unit_file_name
           fi
 EOL
+
 chmod a+x /tmp/resetFailedunits.sh
+/tmp/resetFailedunits.sh
+
 echo "* * * * * sleep 00; /tmp/resetFailedunits.sh" >> mycron
 echo "* * * * * sleep 15; /tmp/resetFailedunits.sh" >> mycron
 echo "* * * * * sleep 30; /tmp/resetFailedunits.sh" >> mycron
