@@ -53,12 +53,14 @@ sudo yum update -y
 sudo yum -y install nfs-utils
 
 sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-sudo yum install -y epel-release apt-transport-https conntrack 
+sudo yum install -y epel-release 
+# apt-transport-https conntrack 
 sudo yum install -y git mc ncdu zsh htop vim gcc wget jq
 
 
-sudo yum -y groupinstall "Development Tools"
-sudo yum install -y openssl-devel bzip2-devel libffi-devel xz-devel
+# sudo yum -y groupinstall "Development Tools"
+sudo yum install -y openssl-devel 
+# bzip2-devel libffi-devel xz-devel
 
 sudo yum install -y bind-utils mlocated yum-utils createrepo bin-utils openssh-clients perl parted
 
