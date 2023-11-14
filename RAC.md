@@ -211,11 +211,14 @@ docker network create --driver=bridge --subnet=192.168.17.0/24 rac_priv1_nw
 sudo su
 mkdir /opt/.secrets/
 openssl rand -out /opt/.secrets/pwd.key -hex 64
+exit
 
 ```
 
 ### set a common password
 ```
+sudo su
+
 cat > /opt/.secrets/common_os_pwdfile << EOF
 P@ssw0rd123#@
 EOF
@@ -225,12 +228,18 @@ rm -f /opt/.secrets/common_os_pwdfile
 
 export COMMON_OS_PWD_FILE="P@ssw0rd123#@"
 
+exit
+export COMMON_OS_PWD_FILE="P@ssw0rd123#@"
+
+
 ```
 
 ### create a RAC hosts file
 ```
+sudo su
 mkdir /opt/containers/
 touch /opt/containers/rac_host_file
+exit
 
 ```
 
