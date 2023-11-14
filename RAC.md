@@ -194,7 +194,7 @@ cd ~/dev/docker-images/OracleDatabase/RAC/OracleRealApplicationClusters/dockerfi
 
 export DOCKER_BUILDKIT=0
 
-./buildContainerImage.sh -v 21.3.0 -o '--build-arg  BASE_OL_IMAGE=oraclelinux:7 --build-arg SLIMMING=true|false'
+time ./buildContainerImage.sh -v 21.3.0 -o '--build-arg  BASE_OL_IMAGE=oraclelinux:7 --build-arg SLIMMING=true|false'
 
 ```  
 
