@@ -35,6 +35,20 @@ git clone https://github.com/oracle/docker-images.git
 
 ```
 
+### if you are using UEKR6 kernel - u need to update the docker configuration
+```
+sudo su 
+sed -i 's|ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock|ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --cpu-rt-runtime=950000|' /usr/lib/systemd/system/docker.service
+
+systemctl daemon-reload
+systemctl stop docker
+systemctl start docker
+cat /usr/lib/systemd/system/docker.service
+exit
+
+```
+
+
 ### it is recommended to provision a Windows VM for the the download and copy of the Oracle RDBMS binaries (with WinSCP)
 
 ### Download and copy the Oracle RDBMS binaries from:   
@@ -159,21 +173,6 @@ sudo sysctl -p
 exit
 
 ``` 
-
-### if you are using UEKR6 kernel - u need to update the docker configuration
-```
-
-sudo su 
-sed -i 's|ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock|ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --cpu-rt-runtime=950000|' /usr/lib/systemd/system/docker.service
-
-systemctl daemon-reload
-systemctl stop docker
-systemctl start docker
-cat /usr/lib/systemd/system/docker.service
-exit
-
-
-```
 
 ### Make sure you copied the Oracle RDBMS binaries to the linux server  
 download from here:  
