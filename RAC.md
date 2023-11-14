@@ -169,7 +169,7 @@ sed -i 's|ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/conta
 systemctl daemon-reload
 systemctl stop docker
 systemctl start docker
-
+cat /usr/lib/systemd/system/docker.service
 exit
 
 
@@ -342,7 +342,7 @@ docker create -t -i \
 ```
 
 
-### prepare the network for the first node
+### Disconnect and reconnect the network for the first node
 
 ```
 docker network disconnect bridge racnode1
@@ -391,7 +391,27 @@ tail -f /tmp/orod.log
 
 ```
 
-Thank you for reading.  
-  
+---
+in case you want to start over with a new racnode1 container:  
+(it's recommended to start over with a new ASM volume as well)
+```
+docker rm -f racnode1
 
-You can find me on https://linktr.ee/yanivharpaz
+```
+
+For a brand new ASM volume do the following:
+(and then repeat "Storage -> NFS" and "Create a docker volume" steps) here:   
+https://github.com/yanivharpaz/oracle-css-il-containers/blob/main/RAC.md#storage---nfs-make-sure-selinux-is-disabled-through-sestatus-command
+
+```
+docker rm -f racnode-storage
+sudo rm -fr /docker_volumes/asm_vol/ORCLCDB/*
+
+```
+
+
+
+---
+
+Thank you for reading.  
+  You can find me on https://linktr.ee/yanivharpaz
