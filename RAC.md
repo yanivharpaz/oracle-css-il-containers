@@ -239,6 +239,7 @@ export COMMON_OS_PWD_FILE="P@ssw0rd123#@"
 sudo su
 mkdir /opt/containers/
 touch /opt/containers/rac_host_file
+chmod 777 /opt/containers/rac_host_file
 exit
 
 ```
