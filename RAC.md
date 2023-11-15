@@ -44,6 +44,7 @@ systemctl daemon-reload
 systemctl stop docker
 systemctl start docker
 cat /usr/lib/systemd/system/docker.service
+ps -ef | grep docker
 exit
 
 ```
