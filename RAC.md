@@ -435,9 +435,9 @@ docker create -t -i \
 
 ### network bridge
 ```
-# docker network disconnect bridge racnode2
-# docker network connect rac_pub1_nw --ip 172.16.1.151 racnode2
-# docker network connect rac_priv1_nw --ip 192.168.17.151 racnode2
+docker network disconnect bridge racnode2
+docker network connect rac_pub1_nw --ip 172.16.1.151 racnode2
+docker network connect rac_priv1_nw --ip 192.168.17.151 racnode2
 
 ```
 
