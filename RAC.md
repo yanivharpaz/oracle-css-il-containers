@@ -424,10 +424,10 @@ docker create -t -i \
   -e OP_TYPE=ADDNODE \
   -e COMMON_OS_PWD_FILE=common_os_pwdfile.enc \
   -e PWD_KEY=pwd.key \
-  --tmpfs=/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-  --cpu-rt-runtime=95000 \
-  --ulimit rtprio=99  \
   --restart=always \
+  --tmpfs=/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  --cpu-rt-runtime=95000 --ulimit rtprio=99  \
+  --ulimit rtprio=99  \
   --name racnode2 \
   oracle/database-rac:21.3.0
 
