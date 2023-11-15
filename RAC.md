@@ -393,7 +393,7 @@ tail -f /tmp/orod.log
 
 ### create the second node
 ```
-# docker create -t -i \
+docker create -t -i \
   --hostname racnode2 \
   --volume /dev/shm \
   --tmpfs /dev/shm:rw,exec,size=4G  \
