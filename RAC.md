@@ -12,6 +12,7 @@ Provision a Linux server (Oracle Linux 7.9) with 2 CPUs and 16GB of RAM, 256GB o
 ```
 
 sudo yum update -y ; sudo yum update -y 
+sudo yum install -y jq git wget curl
 sudo yum install -y docker-engine
 sudo service docker start
 sudo systemctl enable docker
@@ -20,6 +21,8 @@ sudo docker run hello-world
 
 sudo groupadd docker
 sudo usermod -aG docker $USER
+
+uname -r
 
 ```
 
@@ -44,6 +47,7 @@ systemctl daemon-reload
 systemctl stop docker
 systemctl start docker
 cat /usr/lib/systemd/system/docker.service
+
 ps -ef | grep docker
 exit
 
@@ -70,7 +74,8 @@ sudo yum -y install nfs-utils
 sudo yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 sudo yum install -y epel-release 
 # apt-transport-https conntrack 
-sudo yum install -y git mc ncdu zsh htop vim gcc wget jq
+sudo yum install -y git mc ncdu zsh htop vim gcc wget 
+
 
 
 # sudo yum -y groupinstall "Development Tools"
@@ -259,46 +264,6 @@ exit
 
 ```
 
-### create the first node container
-
-```
-docker create -t -i \
-  --hostname racnode1 \
-  --volume /boot:/boot:ro \
-  --volume /dev/shm \
-  --tmpfs /dev/shm:rw,exec,size=4G \
-  --volume /opt/containers/rac_host_file:/etc/hosts  \
-  --volume /opt/.secrets:/run/secrets:ro \
-  --dns=172.16.1.25 \
-  --dns-search=example.com \
-  --privileged=false \
-  --volume racstorage:/oradata \
-  --cap-add=SYS_NICE \
-  --cap-add=SYS_RESOURCE \
-  --cap-add=NET_ADMIN \
-  -e DNS_SERVERS="172.16.1.25" \
-  -e NODE_VIP=172.16.1.160  \
-  -e VIP_HOSTNAME=racnode1-vip  \
-  -e PRIV_IP=192.168.17.150  \
-  -e PRIV_HOSTNAME=racnode1-priv \
-  -e PUBLIC_IP=172.16.1.150 \
-  -e PUBLIC_HOSTNAME=racnode1  \
-  -e SCAN_NAME=racnode-scan \
-  -e OP_TYPE=INSTALL \
-  -e DOMAIN=example.com \
-  -e ASM_DISCOVERY_DIR=/oradata \
-  -e ASM_DEVICE_LIST=/oradata/asm_disk01.img,/oradata/asm_disk02.img,/oradata/asm_disk03.img,/oradata/asm_disk04.img,/oradata/asm_disk05.img  \
-  -e CMAN_HOSTNAME=racnode-cman1 \
-  -e CMAN_IP=172.16.1.15 \
-  -e COMMON_OS_PWD_FILE=common_os_pwdfile.enc \
-  -e PWD_KEY=pwd.key \
-  --restart=always \
-  --tmpfs=/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-  --ulimit rtprio=99  \
-  --name racnode1 \
-  oracle/database-rac:21.3.0
-
-```
 
 ### if using UEKR6 kernel use the following "docker create " command
 ```
@@ -427,7 +392,7 @@ docker create -t -i \
   -e PWD_KEY=pwd.key \
   --restart=always \
   --tmpfs=/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-  --cpu-rt-runtime=950000 --ulimit rtprio=99  \
+  --cpu-rt-runtime=95000 --ulimit rtprio=99  \
   --ulimit rtprio=99  \
   --name racnode2 \
   oracle/database-rac:21.3.0
@@ -504,3 +469,47 @@ sudo rm -fr /docker_volumes/asm_vol/ORCLCDB/*
 
 Thank you for reading.  
   You can find me on https://linktr.ee/yanivharpaz
+
+
+temp data:
+
+### create the first node container
+
+```
+docker create -t -i \
+  --hostname racnode1 \
+  --volume /boot:/boot:ro \
+  --volume /dev/shm \
+  --tmpfs /dev/shm:rw,exec,size=4G \
+  --volume /opt/containers/rac_host_file:/etc/hosts  \
+  --volume /opt/.secrets:/run/secrets:ro \
+  --dns=172.16.1.25 \
+  --dns-search=example.com \
+  --privileged=false \
+  --volume racstorage:/oradata \
+  --cap-add=SYS_NICE \
+  --cap-add=SYS_RESOURCE \
+  --cap-add=NET_ADMIN \
+  -e DNS_SERVERS="172.16.1.25" \
+  -e NODE_VIP=172.16.1.160  \
+  -e VIP_HOSTNAME=racnode1-vip  \
+  -e PRIV_IP=192.168.17.150  \
+  -e PRIV_HOSTNAME=racnode1-priv \
+  -e PUBLIC_IP=172.16.1.150 \
+  -e PUBLIC_HOSTNAME=racnode1  \
+  -e SCAN_NAME=racnode-scan \
+  -e OP_TYPE=INSTALL \
+  -e DOMAIN=example.com \
+  -e ASM_DISCOVERY_DIR=/oradata \
+  -e ASM_DEVICE_LIST=/oradata/asm_disk01.img,/oradata/asm_disk02.img,/oradata/asm_disk03.img,/oradata/asm_disk04.img,/oradata/asm_disk05.img  \
+  -e CMAN_HOSTNAME=racnode-cman1 \
+  -e CMAN_IP=172.16.1.15 \
+  -e COMMON_OS_PWD_FILE=common_os_pwdfile.enc \
+  -e PWD_KEY=pwd.key \
+  --restart=always \
+  --tmpfs=/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  --ulimit rtprio=99  \
+  --name racnode1 \
+  oracle/database-rac:21.3.0
+
+```
