@@ -3,9 +3,8 @@
 
 ### Based on the Oracle RAC container documentation
 
-* https://github.com/oracle/docker-images/tree/main/OracleDatabase/RAC/OracleDNSServer
-
-Provision a Linux server (Oracle Linux 7.9) with 2 CPUs and 16GB of RAM, 256GB of disk space
+* https://github.com/oracle/docker-images/tree/main/OracleDatabase/RAC/OracleRealApplicationClusters
+Provision a Linux server (Oracle Linux 7.9) with 4 CPUs and 32GB of RAM, 256GB of disk space
 
 
 ### install docker
