@@ -280,6 +280,7 @@ docker create -t -i \
   --cap-add=SYS_NICE \
   --cap-add=SYS_RESOURCE \
   --cap-add=NET_ADMIN \
+  --publish 1521:1521 \
   -e DNS_SERVERS="172.16.1.25" \
   -e NODE_VIP=172.16.1.160  \
   -e VIP_HOSTNAME=racnode1-vip  \
@@ -373,6 +374,7 @@ docker create -t -i \
   --cap-add=SYS_NICE \
   --cap-add=SYS_RESOURCE \
   --cap-add=NET_ADMIN \
+  --publish 1522:1521 \
   -e DNS_SERVERS="172.16.1.25" \
   -e EXISTING_CLS_NODES=racnode1 \
   -e NODE_VIP=172.16.1.161  \
