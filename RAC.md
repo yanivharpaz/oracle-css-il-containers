@@ -12,6 +12,8 @@ Provision a Linux server (Oracle Linux 7.9) with 4 CPUs and 32GB of RAM, 256GB o
 
 sudo yum update -y ; sudo yum update -y 
 sudo yum install -y jq git wget curl
+
+sudo yum update -y ; sudo yum update -y 
 sudo yum install -y docker-engine
 sudo service docker start
 sudo systemctl enable docker
