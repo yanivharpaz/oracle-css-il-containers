@@ -227,18 +227,11 @@ docker network create --driver=bridge --subnet=192.168.17.0/24 rac_priv1_nw
 
 ```
 
-## secrets
+## secrets and the common password
 ```
 sudo su
 mkdir /opt/.secrets/
 openssl rand -out /opt/.secrets/pwd.key -hex 64
-exit
-
-```
-
-### set a common password
-```
-sudo su
 
 cat > /opt/.secrets/common_os_pwdfile << EOF
 P@ssw0rd123#@
@@ -247,11 +240,12 @@ EOF
 openssl enc -aes-256-cbc -salt -in /opt/.secrets/common_os_pwdfile -out /opt/.secrets/common_os_pwdfile.enc -pass file:/opt/.secrets/pwd.key
 rm -f /opt/.secrets/common_os_pwdfile
 
+# for root
 export COMMON_OS_PWD_FILE="P@ssw0rd123#@"
 
 exit
+# for the basic user
 export COMMON_OS_PWD_FILE="P@ssw0rd123#@"
-
 
 ```
 
