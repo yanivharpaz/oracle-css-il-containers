@@ -205,8 +205,6 @@ wget https://stgvscodepub.blob.core.windows.net/yhpub/LINUX.X64_213000_grid_home
 wget https://stgvscodepub.blob.core.windows.net/yhpub/LINUX.X64_213000_client.zip
 wget https://stgvscodepub.blob.core.windows.net/yhpub/jdk-17_linux-x64_bin.rpm
 
-# install java with "sudo rpm -ivh jdk-17_linux-x64_bin.rpm"
-
 cp -pv ./LINUX.X64_213000_client.zip ~/dev/docker-images/OracleDatabase/RAC/OracleConnectionManager/dockerfiles/21.3.0
 
 cd ..
@@ -214,6 +212,12 @@ cd ..
 
 ```
 
+### If you need Java / SQLCL
+```
+sudo rpm -ivh jdk-17_linux-x64_bin.rpm
+sudo yum install -y sqlcl
+
+```
 
 ### Build the Oracle RDBMS binaries image
 ```
