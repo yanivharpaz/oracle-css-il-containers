@@ -202,7 +202,12 @@ https://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.h
 cd ~/dev/docker-images/OracleDatabase/RAC/OracleRealApplicationClusters/dockerfiles/21.3.0
 wget https://stgvscodepub.blob.core.windows.net/yhpub/LINUX.X64_213000_db_home.zip
 wget https://stgvscodepub.blob.core.windows.net/yhpub/LINUX.X64_213000_grid_home.zip
+wget https://stgvscodepub.blob.core.windows.net/yhpub/LINUX.X64_213000_client.zip
+
+cp -pv ./LINUX.X64_213000_client.zip ~/dev/docker-images/OracleDatabase/RAC/OracleConnectionManager/dockerfiles/21.3.0
+
 cd ..
+
 
 ```
 
@@ -219,6 +224,13 @@ time ./buildContainerImage.sh -v 21.3.0 -o '--build-arg  BASE_OL_IMAGE=oraclelin
 
 ```  
 
+### Build the connection manager binaries image
+```
+
+cd ~/dev/docker-images/OracleDatabase/RAC/OracleConnectionManager/dockerfiles/
+./buildContainerImage.sh -v 21.3.0
+
+```
 
 ## network
 ```
@@ -348,6 +360,8 @@ systemctl stop rhnsd
 systemctl start rhnsd
 systemctl status
 
+sleep 2
+
 tail -f /tmp/orod.log
 
 ```
@@ -437,10 +451,76 @@ systemctl stop rhnsd
 systemctl start rhnsd
 systemctl status
 
+sleep 2
+
 tail -f /tmp/orod.log
 
 ```
 
+### Checks of the RAC installation
+```
+docker exec -it racnode1 bash
+
+su - grid
+crsctl check cluster -all
+exit
+
+su - oracle
+export ORACLE_SID=ORCLCDB1
+export ORACLE_HOME=/u01/app/oracle/product/21.3.0/dbhome_1
+srvctl status database -d ORCLCDB
+
+exit
+exit
+
+```
+
+Example of a successful installation:
+```
+[opc@rac-test-1 ~]$ docker exec -it racnode1 bash
+
+su - grid
+crsctl check cluster -all
+exit
+
+su - oracle
+export ORACLE_SID=ORCLCDB1
+export ORACLE_HOME=/u01/app/oracle/product/21.3.0/dbhome_1
+srvctl status database -d ORCLCDB
+
+exit
+[root@racnode1 rac-work-dir]#
+[root@racnode1 rac-work-dir]# su - grid
+Last login: Wed Nov 22 14:20:19 UTC 2023 on pts/2
+[grid@racnode1 ~]$ crsctl check cluster -all
+**************************************************************
+racnode1:
+CRS-4537: Cluster Ready Services is online
+CRS-4529: Cluster Synchronization Services is online
+CRS-4533: Event Manager is online
+**************************************************************
+racnode2:
+CRS-4537: Cluster Ready Services is online
+CRS-4529: Cluster Synchronization Services is online
+CRS-4533: Event Manager is online
+**************************************************************
+[grid@racnode1 ~]$ exit
+logout
+[root@racnode1 rac-work-dir]#
+[root@racnode1 rac-work-dir]# su - oracle
+Last login: Wed Nov 22 14:20:22 UTC 2023 on pts/2
+[oracle@racnode1 ~]$ export ORACLE_SID=ORCLCDB1
+[oracle@racnode1 ~]$ export ORACLE_HOME=/u01/app/oracle/product/21.3.0/dbhome_1
+[oracle@racnode1 ~]$ srvctl status database -d ORCLCDB
+Instance ORCLCDB1 is running on node racnode1
+Instance ORCLCDB2 is running on node racnode2
+[oracle@racnode1 ~]$
+[oracle@racnode1 ~]$ exit
+logout
+[root@racnode1 rac-work-dir]# exit
+exit
+
+```
 
 ---
 in case you want to start over with a new racnode1 container:  
