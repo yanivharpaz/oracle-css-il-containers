@@ -522,6 +522,71 @@ exit
 
 ```
 
+### See logs locations
+```
+docker exec -it racnode1 bash
+
+su - oracle
+export ORACLE_SID=ORCLCDB1
+export ORACLE_HOME=/u01/app/oracle/product/21.3.0/dbhome_1
+
+sqlplus / as sysdba
+set linesize 100 pagesize 20
+column name format a25
+column value format a70
+
+select name, value
+from   v$diag_info
+order by 1;
+
+exit
+exit
+exit
+
+```
+### shutdown the system (before stopping the compute instance)  
+```
+docker stop racnode2
+docker stop racnode1
+docker stop racnode-storage
+docker stop racdns
+
+```
+
+
+### Start racnode1 after a reboot
+```
+docker start racnode1
+docker exec -it racnode1 bash
+
+sleep 5
+systemctl stop rhnsd
+systemctl start rhnsd
+systemctl status
+
+sleep 2
+
+tail -f /tmp/orod.log
+
+```
+
+### Start racnode2 after a reboot
+```
+docker start racnode2
+docker exec -it racnode2 bash
+
+sleep 5
+systemctl stop rhnsd
+systemctl start rhnsd
+systemctl status
+
+sleep 2
+
+tail -f /tmp/orod.log
+
+```
+
+
 ---
 in case you want to start over with a new racnode1 container:  
 (it's recommended to start over with a new ASM volume as well)
