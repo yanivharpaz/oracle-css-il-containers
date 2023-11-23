@@ -560,6 +560,18 @@ docker stop racdns
 
 ```
 
+### open pluggable databases to read write
+```
+su - oracle
+export ORACLE_SID=ORCLCDB1
+export ORACLE_HOME=/u01/app/oracle/product/21.3.0/dbhome_1
+
+sqlplus / as sysdba
+show pdbs
+alter pluggable database all open read write instances=all;
+show pdbs
+
+```
 
 ### Start racnode1 after a reboot
 ```
