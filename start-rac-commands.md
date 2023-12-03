@@ -119,3 +119,16 @@ exit
 sql USERNAME/PASSWORD@localhost:1523/orclpdb
 
 ```
+
+
+## Stop RAC
+```
+docker stop racnode2
+docker stop racnode1
+docker stop racnode-cman
+docker stop racnode-storage
+docker stop racdns
+
+docker ps
+
+```
