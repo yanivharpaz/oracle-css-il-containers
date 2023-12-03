@@ -221,3 +221,7 @@ docker stop racdns
 docker ps
 
 ```
+
+---
+Written by Yaniv Harpaz, 2023  
+https://linktr.ee/yanivharpaz
