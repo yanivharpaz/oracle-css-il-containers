@@ -1,10 +1,10 @@
 
 # Start RAC commands  
 
-*This document contains the commands to start the RAC.  
-*The VM host has 5 containers: DNS, Storage, Connection manager, Node 1 and Node 2.
-*The containers are started in the following order: DNS, Storage, Connection manager, Node 1 and Node 2.
-*The containers are started with a delay between them to allow the previous container to start.
+* This document contains the commands to start the RAC.  
+* The VM host has 5 containers: DNS, Storage, Connection manager, Node 1 and Node 2.
+* The containers are started in the following order: DNS, Storage, Connection manager, Node 1 and Node 2.
+* The containers are started with a delay between them to allow the previous container to start.
   
 The commands are executed in the VM host.
 
