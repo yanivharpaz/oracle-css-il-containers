@@ -239,6 +239,25 @@ cd ~/dev/docker-images/OracleDatabase/RAC/OracleConnectionManager/dockerfiles/
 
 ```
 
+### Create the network bridge
+```
+docker network create --driver=bridge --subnet=172.16.1.0/24 rac_pub1_nw
+
+```
+
+### Start the connection manager container
+```
+/usr/bin/docker run -d --hostname racnode-cman1 --dns-search=example.com \
+--network=rac_pub1_nw --ip=172.16.1.15 \
+-e DOMAIN=example.com -e PUBLIC_IP=172.16.1.15 \
+-e PUBLIC_HOSTNAME=racnode-cman1 -e SCAN_NAME=racnode-scan \
+-e SCAN_IP=172.16.1.70 --privileged=false \
+-p 1521:1521 --name racnode-cman oracle/client-cman:21.3.0
+
+docker logs -f racnode-cman
+
+```
+
 ## network
 ```
 docker network create --driver=bridge --subnet=172.16.1.0/24 rac_pub1_nw
@@ -629,9 +648,11 @@ sudo rm -fr /docker_volumes/asm_vol/ORCLCDB/*
 ---
 
 Thank you for reading.  
-  You can find me on https://linktr.ee/yanivharpaz
+You can find me on https://linktr.ee/yanivharpaz  
 
 
+
+<!-- 
 temp data:
 
 ### create the first node container
@@ -673,4 +694,4 @@ docker create -t -i \
   --name racnode1 \
   oracle/database-rac:21.3.0
 
-```
+``` -->
