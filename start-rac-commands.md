@@ -1,5 +1,8 @@
 
+# Start RAC commands
 
+This document contains the commands to start the RAC.
+---
 
 ## DNS
 ```
