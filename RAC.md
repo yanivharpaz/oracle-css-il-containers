@@ -3,7 +3,8 @@
 
 ### Based on the Oracle RAC container documentation
 
-* https://github.com/oracle/docker-images/tree/main/OracleDatabase/RAC/OracleRealApplicationClusters
+* https://github.com/oracle/docker-images/tree/main/OracleDatabase/RAC/OracleRealApplicationClusters  
+  
 Provision a Linux server (Oracle Linux 7.9) with 4 CPUs and 32GB of RAM, 256GB of disk space
 
 
