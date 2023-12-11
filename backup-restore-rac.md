@@ -26,7 +26,7 @@ exit
 
 Currently, the restore is done into /home/oracle/backups inside node 1 container. This is a temporary location. The restore will be done into the same location as the backup.
 
-```
+
 
 ```
 #------------------------
