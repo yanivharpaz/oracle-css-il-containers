@@ -5,9 +5,9 @@ Links to the other markdown files in this repository:
 
 
 
-- [backup-restore-rac.md](backup-restore-rac.md)
-- [rac.md](rac.md)
-- [start-rac-commands.md](start-rac-commands.md)
+- [Create RAC](RAC.md)
+- [Start RAC on the VM](start-rac-commands.md)
+- [Backup & Restore](backup-restore-rac.md)
 
 ## Prerequisites
 
