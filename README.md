@@ -1,8 +1,6 @@
 # oracle-css-il-containers
 Oracle CSS-IL // Run Oracle technology on containers
 
-Links to the other markdown files in this repository:
-
 
 
 - [Create Oracle RAC RDBMS](RAC.md)
