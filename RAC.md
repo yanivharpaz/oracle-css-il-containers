@@ -645,7 +645,6 @@ sudo rm -fr /docker_volumes/asm_vol/ORCLCDB/*
 ```
 
 
-
 ---
 
 Thank you for reading.  
