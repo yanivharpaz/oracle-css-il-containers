@@ -253,7 +253,7 @@ docker network create --driver=bridge --subnet=172.16.1.0/24 rac_pub1_nw
 -e DOMAIN=example.com -e PUBLIC_IP=172.16.1.15 \
 -e PUBLIC_HOSTNAME=racnode-cman1 -e SCAN_NAME=racnode-scan \
 -e SCAN_IP=172.16.1.70 --privileged=false \
--p 1521:1521 --name racnode-cman oracle/client-cman:21.3.0
+-p 1523:1521 --name racnode-cman oracle/client-cman:21.3.0
 
 docker logs -f racnode-cman
 
