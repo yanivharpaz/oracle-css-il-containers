@@ -6,7 +6,7 @@
 ```
 
 #------------------------
-# backup from node 1
+# backup on node 1
 #------------------------
 
 docker exec -it racnode1 bash
