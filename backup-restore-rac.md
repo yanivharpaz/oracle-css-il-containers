@@ -17,7 +17,9 @@ export ORACLE_HOME=/u01/app/oracle/product/21.3.0/dbhome_1
 srvctl status database -d ORCLCDB
 
 rman target /
-backup pluggable database orclpdb;
+# for pluggable database backup do this:
+# backup pluggable database orclpdb;
+backup database;
 
 exit
 
@@ -63,7 +65,9 @@ exit
 
 # begin restore on node 1
 rman target /
-restore pluggable database orclpdb;
+# for pluggable database restore do this:
+# restore pluggable database orclpdb;
+restore database;
 recover database;
 
 exit
