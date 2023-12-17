@@ -18,7 +18,7 @@ srvctl status database -d ORCLCDB
 
 rman target /
 # for pluggable database backup do this:
-# backup pluggable database orclpdb;
+backup pluggable database orclpdb;
 backup database;
 
 exit
@@ -69,6 +69,8 @@ rman target /
 # restore pluggable database orclpdb;
 restore database;
 recover database;
+# restore pluggable database orclpdb;
+# restore pluggable database orclpdb;
 
 exit
 
@@ -105,4 +107,20 @@ exit
 
 ```
 
+### Example of restore to a point in time
+
+```
+
+rman target /
+shutdown immediate;
+startup mount;
+
+restore database;
+
+ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MON-RR HH24:MI:SS';
+RECOVER DATABASE UNTIL TIME '16-DEC-23 14:41:00';
+
+alter database open resetlogs;
+
+```
 
