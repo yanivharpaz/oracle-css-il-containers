@@ -1,6 +1,31 @@
 # Backup and restore RAC
 ---
 
+### initial setup
+```
+rman target /
+
+CONFIGURE DEVICE TYPE DISK PARALLELISM 3;
+
+
+RUN {
+    ALLOCATE CHANNEL ch1 TYPE DISK FORMAT '/home/oracle/backup/chn1/backup_ch1_%U';
+    ALLOCATE CHANNEL ch2 TYPE DISK FORMAT '/home/oracle/backup/chn2/backup_ch2_%U';
+    ALLOCATE CHANNEL ch3 TYPE DISK FORMAT '/home/oracle/backup/chn3/backup_ch3_%U';
+
+    BACKUP DATABASE;
+}
+
+
+RUN {
+    ALLOCATE CHANNEL ch1 TYPE DISK FORMAT '/home/oracle/backup/chn1/backup_ch1_%U';
+    ALLOCATE CHANNEL ch2 TYPE DISK FORMAT '/home/oracle/backup/chn2/backup_ch2_%U';
+    ALLOCATE CHANNEL ch3 TYPE DISK FORMAT '/home/oracle/backup/chn3/backup_ch3_%U';
+
+    BACKUP DATABASE PLUS ARCHIVELOG;
+}
+
+```
 
 ### Backup
 
@@ -17,9 +42,11 @@ export ORACLE_HOME=/u01/app/oracle/product/21.3.0/dbhome_1
 srvctl status database -d ORCLCDB
 
 rman target /
+CONFIGURE DEVICE TYPE DISK PARALLELISM 3;
+
 # for pluggable database backup do this:
 backup pluggable database orclpdb;
-backup database;
+backup database plus archivelog;
 
 exit
 
@@ -60,6 +87,10 @@ srvctl status database -d ORCLCDB
 sqlplus / as sysdba
 shu immediate
 startup mount
+
+### 
+### now it's the time to open the wallet 
+###
 
 exit
 
@@ -118,7 +149,8 @@ startup mount;
 restore database;
 
 ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MON-RR HH24:MI:SS';
-RECOVER DATABASE UNTIL TIME '16-DEC-23 14:41:00';
+RECOVER DATABASE UNTIL TIME '11-DEC-23 14:41:00';
+
 
 alter database open resetlogs;
 
