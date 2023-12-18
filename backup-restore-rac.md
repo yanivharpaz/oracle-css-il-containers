@@ -88,9 +88,10 @@ sqlplus / as sysdba
 shu immediate
 startup mount
 
-### 
+### **************************************************************
 ### now it's the time to open the wallet 
-###
+### administer key management set keystore open identified by "XXXXXXX";
+### **************************************************************
 
 exit
 
@@ -146,10 +147,12 @@ rman target /
 shutdown immediate;
 startup mount;
 
-restore database;
 
-ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MON-RR HH24:MI:SS';
-RECOVER DATABASE UNTIL TIME '11-DEC-23 14:41:00';
+run {
+    set until time "to_date('2023-12-18:12:02:00', 'YYYY-MM-DD:HH24:MI:SS')";
+    restore database;
+    recover database;
+}
 
 
 alter database open resetlogs;
