@@ -159,7 +159,8 @@ alter database open resetlogs;
 
 ```
 
-#### please make sure you perform a new backup after the restore, because the old backups after resetlogs are unusable
+### backup after resetlogs  
+please make sure you perform a new backup after the restore, because the old backups after resetlogs are unusable
 
 ```
 rman target /
