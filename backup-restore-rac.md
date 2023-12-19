@@ -152,7 +152,7 @@ startup mount;
 
 
 run {
-    set until time "to_date('2023-12-19:04:41:00', 'YYYY-MM-DD:HH24:MI:SS')";
+    set until time "to_date('2023-12-19:08:06:00', 'YYYY-MM-DD:HH24:MI:SS')";
     restore database;
     recover database;
 }
@@ -168,6 +168,7 @@ please make sure you perform a new backup after the restore, because the old bac
 ```
 rman target /
 
+crosscheck archivelog all;
 backup database plus archivelog;
 validate database include current controlfile;
 
