@@ -42,13 +42,20 @@ export ORACLE_HOME=/u01/app/oracle/product/21.3.0/dbhome_1
 srvctl status database -d ORCLCDB
 
 rman target /
-CONFIGURE DEVICE TYPE DISK PARALLELISM 3;
 
-# for pluggable database backup do this:
-# backup pluggable database orclpdb;
 
-backup database plus archivelog;
-validate database include current controlfile;
+RUN {
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    crosscheck archivelog all;
+    backup database plus archivelog;
+    validate database include current controlfile;
+
+}
 
 exit
 
@@ -99,12 +106,8 @@ exit
 
 # begin restore on node 1
 rman target /
-# for pluggable database restore do this:
-# restore pluggable database orclpdb;
 restore database;
 recover database;
-# restore pluggable database orclpdb;
-# restore pluggable database orclpdb;
 
 exit
 
@@ -152,7 +155,8 @@ startup mount;
 
 
 run {
-    set until time "to_date('2023-12-19:08:06:00', 'YYYY-MM-DD:HH24:MI:SS')";
+
+    set until time "to_date('2023-12-19:13:15:00', 'YYYY-MM-DD:HH24:MI:SS')";
     restore database;
     recover database;
 }
@@ -168,9 +172,20 @@ please make sure you perform a new backup after the restore, because the old bac
 ```
 rman target /
 
-crosscheck archivelog all;
-backup database plus archivelog;
-validate database include current controlfile;
+
+RUN {
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    crosscheck archivelog all;
+    backup database plus archivelog;
+    validate database include current controlfile;
+
+}
+
 
 exit
 
