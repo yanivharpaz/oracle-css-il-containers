@@ -273,7 +273,7 @@ mkdir /opt/.secrets/
 openssl rand -out /opt/.secrets/pwd.key -hex 64
 
 cat > /opt/.secrets/common_os_pwdfile << EOF
-P@ssw0rd123#@
+Passw0rd123#a
 EOF
 
 openssl enc -aes-256-cbc -salt -in /opt/.secrets/common_os_pwdfile -out /opt/.secrets/common_os_pwdfile.enc -pass file:/opt/.secrets/pwd.key
