@@ -280,11 +280,11 @@ openssl enc -aes-256-cbc -salt -in /opt/.secrets/common_os_pwdfile -out /opt/.se
 rm -f /opt/.secrets/common_os_pwdfile
 
 # for root
-export COMMON_OS_PWD_FILE="P@ssw0rd123#@"
+export COMMON_OS_PWD_FILE="Passw0rd123#a"
 
 exit
 # for the basic user
-export COMMON_OS_PWD_FILE="P@ssw0rd123#@"
+export COMMON_OS_PWD_FILE="Passw0rd123#a"
 
 ```
 
