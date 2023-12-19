@@ -5,13 +5,11 @@
 ```
 rman target /
 
-CONFIGURE DEVICE TYPE DISK PARALLELISM 3;
+CONFIGURE DEVICE TYPE DISK PARALLELISM 1;
 
 
 RUN {
     ALLOCATE CHANNEL ch1 TYPE DISK FORMAT '/home/oracle/backup/chn1/backup_ch1_%U';
-    ALLOCATE CHANNEL ch2 TYPE DISK FORMAT '/home/oracle/backup/chn2/backup_ch2_%U';
-    ALLOCATE CHANNEL ch3 TYPE DISK FORMAT '/home/oracle/backup/chn3/backup_ch3_%U';
 
     BACKUP DATABASE;
 }
@@ -19,8 +17,6 @@ RUN {
 
 RUN {
     ALLOCATE CHANNEL ch1 TYPE DISK FORMAT '/home/oracle/backup/chn1/backup_ch1_%U';
-    ALLOCATE CHANNEL ch2 TYPE DISK FORMAT '/home/oracle/backup/chn2/backup_ch2_%U';
-    ALLOCATE CHANNEL ch3 TYPE DISK FORMAT '/home/oracle/backup/chn3/backup_ch3_%U';
 
     BACKUP DATABASE PLUS ARCHIVELOG;
 }
