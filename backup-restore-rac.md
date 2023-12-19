@@ -146,12 +146,13 @@ exit
 ```
 
 rman target /
+
 shutdown immediate;
 startup mount;
 
 
 run {
-    set until time "to_date('2023-12-19:04:21:00', 'YYYY-MM-DD:HH24:MI:SS')";
+    set until time "to_date('2023-12-19:04:41:00', 'YYYY-MM-DD:HH24:MI:SS')";
     restore database;
     recover database;
 }
