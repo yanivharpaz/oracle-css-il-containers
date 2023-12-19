@@ -12,6 +12,8 @@ RUN {
     ALLOCATE CHANNEL ch1 TYPE DISK FORMAT '/home/oracle/backup/chn1/backup_ch1_%U';
 
     BACKUP DATABASE;
+    validate database include current controlfile;
+
 }
 
 
@@ -19,6 +21,8 @@ RUN {
     ALLOCATE CHANNEL ch1 TYPE DISK FORMAT '/home/oracle/backup/chn1/backup_ch1_%U';
 
     BACKUP DATABASE PLUS ARCHIVELOG;
+    validate database include current controlfile;
+
 }
 
 ```
@@ -41,8 +45,10 @@ rman target /
 CONFIGURE DEVICE TYPE DISK PARALLELISM 3;
 
 # for pluggable database backup do this:
-backup pluggable database orclpdb;
+# backup pluggable database orclpdb;
+
 backup database plus archivelog;
+validate database include current controlfile;
 
 exit
 
@@ -145,7 +151,7 @@ startup mount;
 
 
 run {
-    set until time "to_date('2023-12-18:12:02:00', 'YYYY-MM-DD:HH24:MI:SS')";
+    set until time "to_date('2023-12-19:04:21:00', 'YYYY-MM-DD:HH24:MI:SS')";
     restore database;
     recover database;
 }
@@ -162,6 +168,7 @@ please make sure you perform a new backup after the restore, because the old bac
 rman target /
 
 backup database plus archivelog;
+validate database include current controlfile;
 
 exit
 
