@@ -3,27 +3,54 @@
 
 ### initial setup
 ```
+
+mkdir /oradata/rman_backup
+
 rman target /
 
-CONFIGURE DEVICE TYPE DISK PARALLELISM 1;
+backup database;
 
+backup database plus archivelog;
 
+<!--
 RUN {
-    ALLOCATE CHANNEL ch1 TYPE DISK FORMAT '/home/oracle/backup/chn1/backup_ch1_%U';
+    ALLOCATE CHANNEL ch1 TYPE DISK FORMAT '/oradata/rman_backup/backup_ch1_%U';
 
     BACKUP DATABASE;
     validate database include current controlfile;
 
 }
-
+ 
 
 RUN {
-    ALLOCATE CHANNEL ch1 TYPE DISK FORMAT '/home/oracle/backup/chn1/backup_ch1_%U';
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL ch1 TYPE DISK FORMAT '/oradata/rman_backup/backup_ch1_%U';
 
     BACKUP DATABASE PLUS ARCHIVELOG;
+
     validate database include current controlfile;
 
 }
+
+
+RUN {
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    crosscheck archivelog all;
+
+}
+
+-->
+
 
 ```
 
@@ -43,7 +70,9 @@ srvctl status database -d ORCLCDB
 
 rman target /
 
+backup database plus archivelog;
 
+<!--
 RUN {
     ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
     CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
@@ -56,6 +85,7 @@ RUN {
     validate database include current controlfile;
 
 }
+-->
 
 exit
 
@@ -155,8 +185,16 @@ startup mount;
 
 
 run {
+<!--
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
 
-    set until time "to_date('2023-12-19:13:15:00', 'YYYY-MM-DD:HH24:MI:SS')";
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+-->
+
+    set until time "to_date('2024-02-16:07:46:00', 'YYYY-MM-DD:HH24:MI:SS')";
     restore database;
     recover database;
 }

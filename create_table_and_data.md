@@ -3,6 +3,13 @@
 ```
 
 alter pluggable database all open;
+alter pluggable database orclpdb save state;
+
+alter pluggable database all open;
+alter pluggable database all save state;
+
+
+
 alter session set container=orclpdb;
 select tablespace_name,file_name from dba_data_files;
 
