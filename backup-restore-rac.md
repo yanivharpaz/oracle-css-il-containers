@@ -12,6 +12,7 @@ backup database;
 
 backup database plus archivelog;
 
+```
 <!--
 RUN {
     ALLOCATE CHANNEL ch1 TYPE DISK FORMAT '/oradata/rman_backup/backup_ch1_%U';
@@ -51,8 +52,6 @@ RUN {
 
 -->
 
-
-```
 
 ### Backup
 
