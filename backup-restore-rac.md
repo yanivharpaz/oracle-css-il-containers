@@ -72,6 +72,9 @@ rman target /
 
 backup database plus archivelog;
 
+exit 
+
+```
 <!--
 RUN {
     ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
@@ -86,10 +89,6 @@ RUN {
 
 }
 -->
-
-exit
-
-```
 
 ### Restore on node 1  
 
