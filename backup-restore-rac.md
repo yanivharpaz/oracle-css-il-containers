@@ -183,14 +183,6 @@ startup mount;
 
 
 run {
-<!--
-    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
-    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
-
-    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
-    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
-
--->
 
     set until time "to_date('2024-02-16:07:46:00', 'YYYY-MM-DD:HH24:MI:SS')";
     restore database;
@@ -202,6 +194,15 @@ alter database open resetlogs;
 
 ```
 
+<!--
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+-->
+
 ### backup after resetlogs  
 please make sure you perform a new backup after the restore, because the old backups after resetlogs are unusable
 
@@ -210,11 +211,6 @@ rman target /
 
 
 RUN {
-    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
-    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
-
-    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
-    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
 
     crosscheck archivelog all;
     backup database plus archivelog;
@@ -226,3 +222,12 @@ RUN {
 exit
 
 ```
+<!--
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    -->
+    
