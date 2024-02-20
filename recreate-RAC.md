@@ -74,6 +74,7 @@ docker run -d -t --hostname racnode-storage \
 --volume /docker_volumes/asm_vol/$ORACLE_DBNAME:/oradata --init \
 --network=rac_priv1_nw --ip=192.168.17.25 --tmpfs=/run  \
 --volume /sys/fs/cgroup:/sys/fs/cgroup:ro \
+-e ASM_STORAGE_SIZE_GB=100 \
 --name racnode-storage oracle/rac-storage-server:19.3.0
 
 docker logs -f racnode-storage
