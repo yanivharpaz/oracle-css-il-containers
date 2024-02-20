@@ -11,7 +11,7 @@ Provision a Linux server (Oracle Linux 7.9) with 4 CPUs and 32GB of RAM, 256GB o
 ### install docker
 ```
 
-sudo yum update -y ; sudo yum update -y 
+sudo yum update -y ; sudo yum update -y --skip-broken
 sudo yum install -y jq git wget curl
 
 sudo yum update -y ; sudo yum update -y 
@@ -158,6 +158,8 @@ docker volume create --driver local \
 --opt   o=addr=192.168.17.25,rw,bg,hard,tcp,vers=3,timeo=600,rsize=32768,wsize=32768,actimeo=0 \
 --opt device=192.168.17.25:/oradata \
 racstorage
+
+docker volume create rman_backup_volume
 
 ```
 
