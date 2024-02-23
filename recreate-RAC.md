@@ -366,7 +366,7 @@ exit
 
 ```
 
-### setup backup
+### setup backup in node 1
 ```
 
 docker exec -it racnode1 bash
@@ -384,7 +384,12 @@ alter system set log_archive_dest_1='location=USE_DB_RECOVERY_FILE_DEST';
 exit
 exit
 exit
+```
 
+### setup backup in node 2
+
+
+```
 docker exec -it racnode2 bash
 
 su - oracle

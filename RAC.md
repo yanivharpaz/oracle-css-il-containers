@@ -239,7 +239,8 @@ time ./buildContainerImage.sh -v 21.3.0 -o '--build-arg  BASE_OL_IMAGE=oraclelin
 ```
 
 cd ~/dev/docker-images/OracleDatabase/RAC/OracleConnectionManager/dockerfiles/
-./buildContainerImage.sh -v 21.3.0
+
+time ./buildContainerImage.sh -v 21.3.0
 
 ```
 
