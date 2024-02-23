@@ -386,6 +386,9 @@ alter system set db_recovery_file_dest_size=100G scope=spfile;
  
 alter system set log_archive_dest_1='location=USE_DB_RECOVERY_FILE_DEST';
 
+alter pluggable database all open;
+alter pluggable database all save state;
+
 exit
 exit
 exit
@@ -407,7 +410,21 @@ alter system set db_recovery_file_dest_size=100G scope=spfile;
  
 alter system set log_archive_dest_1='location=USE_DB_RECOVERY_FILE_DEST';
 
+alter pluggable database all open;
+alter pluggable database all save state;
+
+
 exit
+
+
+```
+
+### restart database in node for backup settings to take effect
+
+```
+docker exec -it racnode2 bash
+
+su - oracle
 
 srvctl status database -d ORCLCDB
 srvctl stop database -d ORCLCDB
@@ -415,18 +432,6 @@ srvctl start database -d ORCLCDB
 
 exit
 exit
-
-
-
-
-srvctl stop database -d ORCLCDB
-srvctl status database -d ORCLCDB
-
-sqlplus / as sysdba
-
-startup mount
-alter database archivelog;
-alter database open;
 
 
 ```
@@ -448,7 +453,9 @@ alter database open;
 shutdown immediate
 
 exit
+
 exit
+
 exit
 
 
@@ -478,6 +485,7 @@ exit
 srvctl start database -d ORCLCDB
 
 exit
+
 exit
 
 ```
@@ -493,6 +501,13 @@ su - oracle
 rman target /
 
 backup database plus archivelog;
+
+list backup of database summary;
+
+exit
+
+exit
+
 exit
 
 ```
