@@ -334,7 +334,8 @@ tail -f /tmp/orod.log
 
 ```
 
-### arrange environment
+## setup environment in node 1
+
 ```
 docker exec -it racnode1 bash
 
@@ -347,10 +348,14 @@ echo "alias rmn='rman target /'" >> /home/oracle/.bashrc
 echo "alias bdump='cd /u01/app/oracle/diag/rdbms/orclcdb/ORCLCDB1/trace/'" >> /home/oracle/.bashrc
 echo "alias racstat='srvctl status database -d ORCLCDB'" >> /home/oracle/.bashrc
 
-
-
 exit
 
+
+```
+
+## setup environment in node 2
+
+```
 docker exec -it racnode2 bash
 
 echo "alias suo='su - oracle'" >> ~/.bashrc
