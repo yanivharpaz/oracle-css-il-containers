@@ -334,4 +334,157 @@ tail -f /tmp/orod.log
 
 ```
 
+### arrange environment
+```
+docker exec -it racnode1 bash
+
+echo "alias suo='su - oracle'" >> ~/.bashrc
+
+echo "export ORACLE_SID=ORCLCDB1" >> /home/oracle/.bashrc
+echo "export ORACLE_HOME=/u01/app/oracle/product/21.3.0/dbhome_1" >> /home/oracle/.bashrc
+echo "alias sss='sqlplus / as sysdba'" >> /home/oracle/.bashrc
+echo "alias rmn='rman target /'" >> /home/oracle/.bashrc
+echo "alias bdump='cd /u01/app/oracle/diag/rdbms/orclcdb/ORCLCDB1/trace/'" >> /home/oracle/.bashrc
+echo "alias racstat='srvctl status database -d ORCLCDB'" >> /home/oracle/.bashrc
+
+
+
+exit
+
+docker exec -it racnode2 bash
+
+echo "alias suo='su - oracle'" >> ~/.bashrc
+
+echo "export ORACLE_SID=ORCLCDB2" >> /home/oracle/.bashrc
+echo "export ORACLE_HOME=/u01/app/oracle/product/21.3.0/dbhome_1" >> /home/oracle/.bashrc
+echo "alias sss='sqlplus / as sysdba'" >> /home/oracle/.bashrc
+echo "alias rmn='rman target /'" >> /home/oracle/.bashrc
+echo "alias bdump='cd /u01/app/oracle/diag/rdbms/orclcdb/ORCLCDB2/trace/'" >> /home/oracle/.bashrc
+echo "alias racstat='srvctl status database -d ORCLCDB'" >> /home/oracle/.bashrc
+
+exit
+
+```
+
+### setup backup
+```
+
+docker exec -it racnode1 bash
+
+su - oracle
+
+sqlplus / as sysdba
+
+alter system set db_recovery_file_dest='+DATA' scope=spfile;
+
+alter system set db_recovery_file_dest_size=100G scope=spfile;
+ 
+alter system set log_archive_dest_1='location=USE_DB_RECOVERY_FILE_DEST';
+
+exit
+exit
+exit
+
+docker exec -it racnode2 bash
+
+su - oracle
+
+sqlplus / as sysdba
+
+alter system set db_recovery_file_dest='+DATA' scope=spfile;
+
+alter system set db_recovery_file_dest_size=100G scope=spfile;
+ 
+alter system set log_archive_dest_1='location=USE_DB_RECOVERY_FILE_DEST';
+
+exit
+
+srvctl status database -d ORCLCDB
+srvctl stop database -d ORCLCDB
+srvctl start database -d ORCLCDB
+
+exit
+exit
+
+
+
+
+srvctl stop database -d ORCLCDB
+srvctl status database -d ORCLCDB
+
+sqlplus / as sysdba
+
+startup mount
+alter database archivelog;
+alter database open;
+
+
+```
+
+### setup archivelog in node1
+```
+docker exec -it racnode1 bash
+
+su - oracle
+
+srvctl stop database -d ORCLCDB
+
+sqlplus / as sysdba
+
+shutdown immediate
+startup mount
+alter database archivelog;
+alter database open;
+shutdown immediate
+
+exit
+exit
+exit
+
+
+```
+
+### setup archivelog in node2
+
+
+```
+
+docker exec -it racnode2 bash
+
+su - oracle
+
+srvctl stop database -d ORCLCDB
+
+sqlplus / as sysdba
+
+shutdown immediate
+startup mount
+alter database archivelog;
+alter database open;
+shutdown immediate
+
+exit
+
+srvctl start database -d ORCLCDB
+
+exit
+exit
+
+```
+
+
+### backup
+```
+
+docker exec -it racnode1 bash
+
+su - oracle
+
+rman target /
+
+backup database plus archivelog;
+exit
+
+```
+
 
