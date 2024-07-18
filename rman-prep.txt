@@ -1,0 +1,141 @@
+docker volume create rman_backup_volume
+
+docker create -t -i \
+  --hostname racnode1 \
+  --volume /boot:/boot:ro \
+  --volume /dev/shm \
+  --tmpfs /dev/shm:rw,exec,size=4G \
+  --volume /opt/containers/rac_host_file:/etc/hosts  \
+  --volume /opt/.secrets:/run/secrets:ro \
+  --volume rman_backup_volume:/u01/backup:rw \
+  --dns=172.16.1.25 \
+  --dns-search=example.com \
+  --privileged=false \
+  --volume racstorage:/oradata \
+  --cap-add=SYS_NICE \
+  --cap-add=SYS_RESOURCE \
+  --cap-add=NET_ADMIN \
+  -e DNS_SERVERS="172.16.1.25" \
+  -e NODE_VIP=172.16.1.160  \
+  -e VIP_HOSTNAME=racnode1-vip  \
+  -e PRIV_IP=192.168.17.150  \
+  -e PRIV_HOSTNAME=racnode1-priv \
+  -e PUBLIC_IP=172.16.1.150 \
+  -e PUBLIC_HOSTNAME=racnode1  \
+  -e SCAN_NAME=racnode-scan \
+  -e OP_TYPE=INSTALL \
+  -e DOMAIN=example.com \
+  -e ASM_DISCOVERY_DIR=/oradata \
+  -e ASM_DEVICE_LIST=/oradata/asm_disk01.img,/oradata/asm_disk02.img,/oradata/asm_disk03.img,/oradata/asm_disk04.img,/oradata/asm_disk05.img  \
+  -e CMAN_HOSTNAME=racnode-cman1 \
+  -e CMAN_IP=172.16.1.15 \
+  -e COMMON_OS_PWD_FILE=common_os_pwdfile.enc \
+  -e PWD_KEY=pwd.key \
+  --restart=always \
+  --tmpfs=/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  --cpu-rt-runtime=95000 \
+  --ulimit rtprio=99  \
+  --name racnode1 \
+  oracle/database-rac:21.3.0
+
+
+docker create -t -i \
+  --hostname racnode2 \
+  --volume /dev/shm \
+  --tmpfs /dev/shm:rw,exec,size=4G  \
+  --volume /boot:/boot:ro \
+  --dns-search=example.com  \
+  --volume /opt/containers/rac_host_file:/etc/hosts \
+  --volume /opt/.secrets:/run/secrets:ro \
+  --volume rman_backup_volume:/u01/backup:rw \
+  --dns=172.16.1.25 \
+  --dns-search=example.com \
+  --privileged=false \
+  --volume racstorage:/oradata \
+  --cap-add=SYS_NICE \
+  --cap-add=SYS_RESOURCE \
+  --cap-add=NET_ADMIN \
+  -e DNS_SERVERS="172.16.1.25" \
+  -e EXISTING_CLS_NODES=racnode1 \
+  -e NODE_VIP=172.16.1.161  \
+  -e VIP_HOSTNAME=racnode2-vip  \
+  -e PRIV_IP=192.168.17.151  \
+  -e PRIV_HOSTNAME=racnode2-priv \
+  -e PUBLIC_IP=172.16.1.151  \
+  -e PUBLIC_HOSTNAME=racnode2  \
+  -e DOMAIN=example.com \
+  -e SCAN_NAME=racnode-scan \
+  -e ASM_DISCOVERY_DIR=/oradata \
+  -e ASM_DEVICE_LIST=/oradata/asm_disk01.img,/oradata/asm_disk02.img,/oradata/asm_disk03.img,/oradata/asm_disk04.img,/oradata/asm_disk05.img \
+  -e ORACLE_SID=ORCLCDB \
+  -e OP_TYPE=ADDNODE \
+  -e COMMON_OS_PWD_FILE=common_os_pwdfile.enc \
+  -e PWD_KEY=pwd.key \
+  --tmpfs=/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  --cpu-rt-runtime=95000 \
+  --ulimit rtprio=99  \
+  --restart=always \
+  --name racnode2 \
+  oracle/database-rac:21.3.0
+
+
+CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT '/u01/backup/%U';
+
+RUN {
+    CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT '/u01/backup/%U';
+    
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    # Your backup commands go here
+    BACKUP DATABASE PLUS ARCHIVELOG;
+    
+    # Release the channels
+    RELEASE CHANNEL c1;
+    RELEASE CHANNEL c2;
+}
+
+
+RUN {
+    CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT '/u01/backup/%U';
+    
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    # Your backup commands go here
+    restore database;
+    recover database;
+    
+    # Release the channels
+    RELEASE CHANNEL c1;
+    RELEASE CHANNEL c2;
+}
+
+
+run {
+    CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT '/u01/backup/%U';
+    
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+
+    set until time "to_date('2024-02-02:00:12:00', 'YYYY-MM-DD:HH24:MI:SS')";
+    restore database;
+    recover database;
+}
+
+RUN {
+    CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT '/u01/backup/%U';
+    
+    BACKUP DATABASE PLUS ARCHIVELOG;
+}
+

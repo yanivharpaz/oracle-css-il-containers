@@ -1,0 +1,137 @@
+
+
+
+sudo docker stop $(docker ps -q)
+sudo docker rm -f $(docker ps -aq)
+sudo docker rmi -f $(docker images -q)
+sudo docker volume rm $(docker volume ls -q)
+sudo docker network rm $(docker network ls -q)
+
+sudo systemctl stop docker
+
+sudo yum remove -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+sudo rm -rf /var/lib/docker /var/lib/containerd
+
+sudo rm -rf /etc/docker
+sudo rm -rf /var/run/docker.sock
+
+sudo systemctl daemon-reload
+sudo yum clean all
+
+sudo rm -fr /docker_volumes/asm_vol
+
+
+sudo rm -f /opt/.secrets/pwd.key /opt/.secrets/common_os_pwdfile.enc
+sudo rm -f /opt/containers/rac_host_file
+
+
+# ---------------------------------------
+
+sudo yum update -y --skip-broken
+
+sudo yum install -y git wget curl
+
+sudo yum install -y docker-engine
+sudo service docker start
+sudo systemctl enable docker
+
+sudo docker run hello-world
+
+sudo groupadd docker
+sudo usermod -aG docker $USER
+
+uname -r
+
+
+
+
+# ---------------------------------------
+
+
+
+# .bashrc
+
+export ORACLE_SID=ORCLCDB1
+export ORACLE_HOME=/u01/app/oracle/product/21.3.0/dbhome_1
+srvctl status database -d ORCLCDB
+alias sss='sqlplus / as sysdba'
+alias wdb=' watch srvctl status database -d ORCLCDB'
+
+
+[oracle@racnode1 ~]$ cat *.sql
+select count(*) from yaniv_tb
+/
+insert into yaniv_tb select * from yaniv_tb
+/
+commit;
+
+alter session set container=orclpdb
+/
+
+ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MON-RR HH24:MI:SS';
+select sysdate from dual
+/
+
+
+-------
+prep 
+
+create user c##bck identified by Password1 container=all;
+grant sysdba, connect to c##bck container=all;
+
+
+srvctl stop database -d orclcdb
+
+
+shu immediate
+startup mount 
+alter database archivelog;
+
+alter database open;
+
+#---------------------------
+# recreate
+#---------------------------
+docker rm -f racnode2 racnode1 racnode-storage
+
+sudo rm -fr /docker_volumes/asm_vol
+
+#--
+
+cd ~/dev/docker-images/OracleDatabase/RAC/OracleRACStorageServer/dockerfiles/
+./buildDockerImage.sh -v 19.3.0
+
+docker images
+
+docker network create --driver=bridge --subnet=192.168.17.0/24 rac_priv1_nw
+
+sudo yum -y install nfs-utils
+
+export ORACLE_DBNAME=ORCLCDB
+docker run -d -t --hostname racnode-storage \
+--dns-search=example.com  --cap-add SYS_ADMIN --cap-add AUDIT_WRITE \
+--volume /docker_volumes/asm_vol/$ORACLE_DBNAME:/oradata --init \
+--network=rac_priv1_nw --ip=192.168.17.25 --tmpfs=/run  \
+--volume /sys/fs/cgroup:/sys/fs/cgroup:ro \
+--name racnode-storage oracle/rac-storage-server:19.3.0
+
+docker logs -f racnode-storage
+
+#--
+
+
+docker volume create --driver local \
+--opt type=nfs \
+--opt   o=addr=192.168.17.25,rw,bg,hard,tcp,vers=3,timeo=600,rsize=32768,wsize=32768,actimeo=0 \
+--opt device=192.168.17.25:/oradata \
+racstorage
+
+#-- 
+
+docker network create --driver=bridge --subnet=172.16.1.0/24 rac_pub1_nw
+docker network create --driver=bridge --subnet=192.168.17.0/24 rac_priv1_nw
+
+
+
+

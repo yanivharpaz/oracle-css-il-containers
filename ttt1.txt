@@ -1,0 +1,205 @@
+
+yum remove -y docker-buildx-plugin-0:0.11.2-1.el7.x86_64
+yum remove -y docker-ce
+yum remove -y docker-ce-cli
+
+yum-config-manager --disable https://download.docker.com/linux/centos/docker-ce.repo
+
+yum update -y 
+yum-config-manager --add-repo https://yum.oracle.com/repo/OracleLinux/OL7/addons/x86_64/
+
+yum update -y 
+yum --disablerepo="*" --enablerepo="ol7_addons" install -y docker
+
+
+
+ --cpu-rt-runtime=950000
+  --cpu-rt-runtime=95000 --ulimit rtprio=99
+
+
+sed -i 's|ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock|ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --cpu-rt-runtime=950000' docker.service
+
+sudo su 
+sed -i 's|ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock|ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock --cpu-rt-runtime=950000|' /usr/lib/systemd/system/docker.service
+exit
+
+
+
+
+docker login container-registry.oracle.com
+
+docker pull container-registry.oracle.com/database/enterprise:19.3.0.0
+
+docker network create oradbnet
+docker network ls
+
+export ORACLE_SID=oradb01
+export ORANET=oradbnet
+
+sudo mkdir -p /data/oradata/$ORACLE_SID
+sudo chown 54321:54322 -R /data/oradata/$ORACLE_SID
+docker run -d -p 1527:1521 -p 5500:5500 --name $ORACLE_SID --user oracle --network $ORANET -v /data/oradata/$ORACLE_SID:/opt/oracle/oradata -e ORACLE_PDB=$ORACLE_SID_PDB -e ORACLE_SID=$ORACLE_SID container-registry.oracle.com/database/enterprise:19.3.0.0
+
+docker port $ORACLE_SID
+docker logs -f $ORACLE_SID
+
+
+docker save -o oradb01.tar container-registry.oracle.com/database/enterprise
+
+[opc@rac-test-1 backup-images]$ docker images
+REPOSITORY                                          TAG                 IMAGE ID            CREATED             SIZE
+oracle/client-cman                                  21.3.0              6b45aa623460        12 days ago         3.48GB
+oracle/database-rac                                 21.3.0              2c091c72173a        2 weeks ago         14.2GB
+<none>                                              <none>              381a472a2996        2 weeks ago         19.7GB
+<none>                                              <none>              15a57f6de90b        2 weeks ago         19.7GB
+oracle/rac-storage-server                           19.3.0              9bf47b8ab541        2 weeks ago         329MB
+oracle/rac-dnsserver                                latest              be2efb6c8ede        2 weeks ago         286MB
+oraclelinux                                         7-slim              506c06ed74d4        2 weeks ago         138MB
+oraclelinux                                         7                   767c334d977d        2 weeks ago         261MB
+container-registry.oracle.com/database/enterprise   19.3.0.0            291fd8c7958b        3 months ago        8.32GB
+
+
+docker save -o client-cman.tar oracle/client-cman:21.3.0
+docker save -o database-rac-node.tar oracle/database-rac:21.3.0
+docker save -o rac-storage-server.tar oracle/rac-storage-server:19.3.0
+docker save -o rac-dnsserver.tar oracle/rac-dnsserver:latest
+docker save -o oraclelinux-7-slim.tar oraclelinux:7-slim
+docker save -o oraclelinux-7.tar oraclelinux:7
+
+
+
+gzip -9 client-cman.tar &
+gzip -9 database-rac-node.tar &
+gzip -9 oraclelinux-7-slim.tar &
+gzip -9 oraclelinux-7.tar &
+gzip -9 rac-dnsserver.tar &
+gzip -9 rac-storage-server.tar &
+
+
+
+List of Backup Sets
+===================
+
+BS Key  Type LV Size       Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ---------------
+100     Full    500M       DISK        00:01:00     23-MAR-23
+    BP Key: 101   Status: AVAILABLE  Compressed: NO  Tag: TAG20230323T120000
+    Piece Name: /u01/app/oracle/fast_recovery_area/DB01/backupset/2023_03_23/o1_mf_nnndf_TAG20230323T120000_gj5dqk2f_.bkp
+  List of Datafiles in backup set 100
+  File LV Type Ckp SCN    Ckp Time             Name
+  ---- -- ---- ---------- -------------------- ----
+  1       Full 1234567890 23-MAR-23            /u01/app/oracle/oradata/DB01/system01.dbf
+  ... (other datafiles)
+
+
+run {
+    set until scn 1234567890;  # Use the SCN from the backup set you're restoring
+    restore database from tag 'TAG20230323T120000';  # Use the tag from your chosen backup set
+    recover database;
+}
+
+
+
+
+RUN {
+    # ALLOCATE CHANNEL ch1 TYPE DISK FORMAT '/oradata/rman_backup/backup_ch1_%U';
+
+    BACKUP DATABASE;
+    validate database include current controlfile;
+}
+
+
+
+shutdown immediate;
+startup mount;
+run {
+    set until scn 2804864;  # Use the SCN from the backup set you're restoring
+    restore database from tag 'TAG20231219T220440';  # Use the tag from your chosen backup set
+    recover database;
+}
+
+
+
+
+docker create -t -i \
+  --hostname racnode1 \
+  --volume /boot:/boot:ro \
+  --volume /dev/shm \
+  --tmpfs /dev/shm:rw,exec,size=4G \
+  --volume /opt/containers/rac_host_file:/etc/hosts  \
+  --volume /opt/.secrets:/run/secrets:ro \
+  --dns=172.16.1.25 \
+  --dns-search=example.com \
+  --privileged=false \
+  --volume racstorage:/oradata \
+  --volume rman_backup_volume:/u01/backup:rw \
+  --cap-add=SYS_NICE \
+  --cap-add=SYS_RESOURCE \
+  --cap-add=NET_ADMIN \
+  --publish 1521:1521 \
+  -e DNS_SERVERS="172.16.1.25" \
+  -e NODE_VIP=172.16.1.160  \
+  -e VIP_HOSTNAME=racnode1-vip  \
+  -e PRIV_IP=192.168.17.150  \
+  -e PRIV_HOSTNAME=racnode1-priv \
+  -e PUBLIC_IP=172.16.1.150 \
+  -e PUBLIC_HOSTNAME=racnode1  \
+  -e SCAN_NAME=racnode-scan \
+  -e OP_TYPE=INSTALL \
+  -e DOMAIN=example.com \
+  -e ASM_DISCOVERY_DIR=/oradata \
+  -e ASM_DEVICE_LIST=/oradata/asm_disk01.img,/oradata/asm_disk02.img,/oradata/asm_disk03.img,/oradata/asm_disk04.img,/oradata/asm_disk05.img  \
+  -e CMAN_HOSTNAME=racnode-cman1 \
+  -e CMAN_IP=172.16.1.15 \
+  -e COMMON_OS_PWD_FILE=common_os_pwdfile.enc \
+  -e PWD_KEY=pwd.key \
+  --restart=always \
+  --tmpfs=/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  --cpu-rt-runtime=95000 --ulimit rtprio=99  \
+  --ulimit rtprio=99  \
+  --name racnode1 \
+  oracle/database-rac:21.3.0
+
+
+docker create -t -i \
+  --hostname racnode2 \
+  --volume /dev/shm \
+  --tmpfs /dev/shm:rw,exec,size=4G  \
+  --volume /boot:/boot:ro \
+  --dns-search=example.com  \
+  --volume /opt/containers/rac_host_file:/etc/hosts \
+  --volume /opt/.secrets:/run/secrets:ro \
+  --dns=172.16.1.25 \
+  --dns-search=example.com \
+  --privileged=false \
+  --volume racstorage:/oradata \
+  --volume rman_backup_volume:/u01/backup:rw \
+  --cap-add=SYS_NICE \
+  --cap-add=SYS_RESOURCE \
+  --cap-add=NET_ADMIN \
+  --publish 1522:1521 \
+  -e DNS_SERVERS="172.16.1.25" \
+  -e EXISTING_CLS_NODES=racnode1 \
+  -e NODE_VIP=172.16.1.161  \
+  -e VIP_HOSTNAME=racnode2-vip  \
+  -e PRIV_IP=192.168.17.151  \
+  -e PRIV_HOSTNAME=racnode2-priv \
+  -e PUBLIC_IP=172.16.1.151  \
+  -e PUBLIC_HOSTNAME=racnode2  \
+  -e DOMAIN=example.com \
+  -e SCAN_NAME=racnode-scan \
+  -e ASM_DISCOVERY_DIR=/oradata \
+  -e ASM_DEVICE_LIST=/oradata/asm_disk01.img,/oradata/asm_disk02.img,/oradata/asm_disk03.img,/oradata/asm_disk04.img,/oradata/asm_disk05.img \
+  -e ORACLE_SID=ORCLCDB \
+  -e OP_TYPE=ADDNODE \
+  -e COMMON_OS_PWD_FILE=common_os_pwdfile.enc \
+  -e PWD_KEY=pwd.key \
+  --restart=always \
+  --tmpfs=/run -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+  --cpu-rt-runtime=95000 --ulimit rtprio=99  \
+  --ulimit rtprio=99  \
+  --name racnode2 \
+  oracle/database-rac:21.3.0
+
+
+

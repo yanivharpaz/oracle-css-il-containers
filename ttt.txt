@@ -1,0 +1,271 @@
+
+
+export ORACLE_SID=ORCLCDB1
+export ORACLE_HOME=/u01/app/oracle/product/21.3.0/dbhome_1
+
+alias sss='sqlplus / as sysdba'
+alias rmn='rman target /'
+
+
+sqlplus "/ as sysdba"
+alter system set db_recovery_file_dest='+DATA' scope=spfile;
+alter system set db_recovery_file_dest_size=100G scope=spfile;
+ 
+alter system set log_archive_dest_1='location=USE_DB_RECOVERY_FILE_DEST';
+
+
+
+
+docker save -o client-cman.tar oracle/client-cman:21.3.0
+docker save -o database-rac-node.tar oracle/database-rac:21.3.0
+docker save -o rac-storage-server.tar oracle/rac-storage-server:19.3.0
+docker save -o rac-dnsserver.tar oracle/rac-dnsserver:latest
+docker save -o oraclelinux-7-slim.tar oraclelinux:7-slim
+docker save -o oraclelinux-7.tar oraclelinux:7
+
+
+
+gzip -9 client-cman.tar &
+gzip -9 database-rac-node.tar &
+gzip -9 oraclelinux-7-slim.tar &
+gzip -9 oraclelinux-7.tar &
+gzip -9 rac-dnsserver.tar &
+gzip -9 rac-storage-server.tar &
+
+
+docker save -o 2023-12-15-01-client-cman.tar          oracle/client-cman:21.3.0          &
+docker save -o 2023-12-15-01-database-rac-node.tar    oracle/database-rac:21.3.0         &
+docker save -o 2023-12-15-01-rac-storage-server.tar   oracle/rac-storage-server:19.3.0   &
+docker save -o 2023-12-15-01-rac-dnsserver.tar        oracle/rac-dnsserver:latest        &
+docker save -o 2023-12-15-01-oraclelinux-7-slim.tar   oraclelinux:7-slim                 &
+docker save -o 2023-12-15-01-oraclelinux-7.tar        oraclelinux:7                      &
+
+
+
+gzip -9 2023-12-15-01-oraclelinux-7-slim.tar   &
+gzip -9 2023-12-15-01-oraclelinux-7.tar        &
+gzip -9 2023-12-15-01-rac-dnsserver.tar        &
+gzip -9 2023-12-15-01-rac-storage-server.tar   &
+
+gzip -9 2023-12-15-01-client-cman.tar          &
+gzip -9 2023-12-15-01-database-rac-node.tar    &
+
+
+
+mv client-cman.tar.gz        2023-12-04-01-client-cman.tar.gz
+mv database-rac-node.tar.gz  2023-12-04-01-database-rac-node.tar.gz
+mv oraclelinux-7-slim.tar.gz 2023-12-04-01-oraclelinux-7-slim.tar.gz
+mv oraclelinux-7.tar.gz      2023-12-04-01-oraclelinux-7.tar.gz
+mv rac-dnsserver.tar.gz      2023-12-04-01-rac-dnsserver.tar.gz
+mv rac-storage-server.tar.gz 2023-12-04-01-rac-storage-server.tar.gz
+
+
+
+create tablespace my_data_tbs datafile '/opt/oracle/oradata/ORADB01/ORCLPDB1/my_data_tbs01.dbf' size 10m;
+
+
+
+alter pluggable database all open;
+
+alter session set container=orclpdb;
+
+create tablespace my_data_tbs datafile '+DATA/ORCLCDB/my_data_tbs01.dbf' size 10m;
+
+drop table system.my_data_tb purge;
+create table system.my_data_tb (
+    my_id          number primary key
+    ,first_name    varchar(100)
+    ,last_name     varchar(100)
+    ,insert_date   date
+    )
+tablespace my_data_tbs ;
+insert into system.my_data_tb (my_id, first_name, last_name, insert_date) values (1,  'Scott',  'Tiger'  , sysdate);
+insert into system.my_data_tb (my_id, first_name, last_name, insert_date) values (2,  'Jim'   , 'Brown'  , sysdate);
+insert into system.my_data_tb (my_id, first_name, last_name, insert_date) values (3,  'Peyton', 'Manning', sysdate);
+
+commit;
+
+
+restore database from TAG='TAG20231212T091342';
+
+
+
+
+rman target /
+shutdown immediate;
+startup mount;
+
+restore database;
+
+ALTER SESSION SET NLS_DATE_FORMAT = 'DD-MON-RR HH24:MI:SS';
+RECOVER DATABASE UNTIL TIME '18-DEC-23 11:10:00';
+
+
+alter database open resetlogs;
+
+recover datafile 11 from 49;
+
+run {
+    set until backupset 49;
+    restore database;
+}
+
+run {
+    set until time "to_date('2023-12-18:11:56:00', 'YYYY-MM-DD:HH24:MI:SS')";
+    restore database;
+    recover database;
+}
+
+run {
+    set until time "to_date('2024-02-16:00:02:00', 'YYYY-MM-DD:HH24:MI:SS')";
+    restore database;
+    recover database;
+}
+
+
+ CONNECT TARGET sys/password@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=192.168.1.100)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCL)))
+
+
+sqlplus bck/Password1@"(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=192.168.17.150)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))"
+
+rman target bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=192.168.17.150)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))
+rman target c##bck/Password1@"(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=192.168.17.150)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))"
+
+
+create user c##bck identified by Password1 container=all;
+grant sysdba, connect to c##bck container=all;
+
+rman target c##bck/Password1@"(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=172.16.1.15)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))"
+sqlplus c##bck/Password1@"(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=172.16.1.15)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))"
+
+sqlplus c##bck/Password1@"(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=172.16.1.150)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))"
+
+
+col username format a30
+col machine format a30
+select inst_id, username, machine 
+from gv$session
+where username is not null
+order by 1 desc;
+
+rman target c##bck/Password1@"(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))"
+rman target c##bck/Password1@"(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))"
+
+rman target c##bck/Password1@"(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))" target c##bck/Password1@"(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))"
+
+rman TARGET sys/password@node1 TARGET sys/password@node2 CATALOG rman_catalog_user/password@catalog_db
+
+run {
+allocate channel c1 device type disk connect c##bck/Password1@"(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))"
+allocate channel c2 device type disk connect c##bck/Password1@"(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))"
+}
+
+
+RUN {
+    CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT '/u01/backup/%U';
+    
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    # Your backup commands go here
+    BACKUP DATABASE PLUS ARCHIVELOG;
+    
+    # Release the channels
+    RELEASE CHANNEL c1;
+    RELEASE CHANNEL c2;
+}
+
+
+RUN {
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    # Your backup commands go here
+    crosscheck ARCHIVELOG all;
+}
+
+{    # Release the channels
+    RELEASE CHANNEL c1;
+    RELEASE CHANNEL c2;
+}
+
+
+
+run {
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+
+    restore database;
+    recover database;
+}
+
+
+
+
+
+run {
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    restore database;
+    recover database;
+}
+
+
+
+
+run {
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+    set until time "to_date('2023-12-20:07:46:00', 'YYYY-MM-DD:HH24:MI:SS')";
+    restore database;
+    recover database;
+}
+
+
+run {
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+    set until scn 2668495;
+    restore database;
+    recover database;
+}
+
+
+run {
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+
+    backup database;
+}
+
+
+run {
+    ALLOCATE CHANNEL c1 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+    ALLOCATE CHANNEL c2 DEVICE TYPE DISK 
+    CONNECT 'c##bck/Password1@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=racnode2)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=ORCLCDB)))';
+    restore database;
+    recover database;
+}
+
+
